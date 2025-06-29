@@ -11,6 +11,11 @@
             OrderType = orderType;
         }
 
+        public bool IsEmpty()
+        {
+            return OrderBy == null || string.IsNullOrEmpty(OrderBy.Value) || OrderType == null || OrderType.Value == OrderTypesEnum.None;
+        }
+
         public static Order None() 
         {
             return new Order(new OrderBy(""), new OrderType(OrderTypesEnum.None));

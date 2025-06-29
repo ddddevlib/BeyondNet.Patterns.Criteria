@@ -2,8 +2,8 @@
 {
     public static class OrderTypesEnum
     {
-        public const string Ascending = "asc";
-        public const string Descending = "desc";
-        public const string None = "none";
+        public const string Ascending = "ASC";
+        public const string Descending = "DESC";
+        public const string None = "None";
     }
 }

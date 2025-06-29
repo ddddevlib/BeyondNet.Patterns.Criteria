@@ -40,5 +40,10 @@
                 new FilterValue(value)
             );
         }
+
+        public FilterPrimitives ToPrimitives()
+        {
+            return new FilterPrimitives(Field.Value, Operator.Value, Value.Value);
+        }
     }
 }

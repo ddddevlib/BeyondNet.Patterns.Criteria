@@ -25,6 +25,8 @@
         public const string All = "ALL";
         public const string IsTrue = "IS TRUE";
         public const string IsFalse = "IS FALSE";
-        public const string IsEmpty = "IS EMPTY";
+        public const string IsEmpty = "IS EMPTY";        
     }
+
+    
 }

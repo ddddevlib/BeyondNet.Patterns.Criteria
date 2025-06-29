@@ -16,5 +16,15 @@
             return new Filters(filters);
 
         }
+
+        public FilterPrimitives[] ToPrimitives()
+        {
+            return Value.Select(f => new FilterPrimitives(f.Field.Value, f.Operator.Value, f.Value.Value)).ToArray();
+        }
+
+        public bool IsEmpty()
+        {
+            return Value == null || Value.Length == 0;
+        }
     }
 }

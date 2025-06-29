@@ -1,40 +1,59 @@
-﻿using System.Text;
+﻿using BeyondNet.Patterns.Criteria.Models;
+using System.Text;
 
 namespace BeyondNet.Patterns.Criteria.Impl
 {
     public class CriteriaToMsSql
     {
-        public Models.Criteria ConverTo(string[] fieldsToSelect, string tableName, Models.Criteria criteria)
+        public string Convert(string[] fieldsToSelect, string tableName, Models.Criteria criteria)
         {
-            if (criteria == null)
-            {
-                throw new ArgumentNullException(nameof(criteria), "Criteria cannot be null");
-            }
-            if (fieldsToSelect == null || fieldsToSelect.Length == 0)
-            {
-                throw new ArgumentException("At least one field must be specified for selection", nameof(fieldsToSelect));
-            }
-            if (string.IsNullOrWhiteSpace(tableName))
-            {
-                throw new ArgumentException("Table name cannot be null or empty", nameof(tableName));
-            }
+            var queryBuilder = new StringBuilder();
+            queryBuilder.Append($"SELECT {string.Join(", ", fieldsToSelect)} FROM {tableName}");
 
-            var queryBuilder = new StringBuilder($"SELECT {string.Join(", ", fieldsToSelect)} FROM {tableName}");
-
-            if (criteria.Filters != null && criteria.Filters.Value.Any())
+            if (criteria.HasFilters())
             {
                 queryBuilder.Append(" WHERE ");
-                var filterConditions = criteria.Filters.Value.Select(f => $"{f.Field.Value} {f.Operator.Value} '{f.Value.Value}'");
-                queryBuilder.Append(string.Join(" AND ", filterConditions));
+
+                var whereQuery = criteria.Filters.Value
+                    .Select(filter => GenerateWhereQuery(filter))
+                    .ToList();
+
+                queryBuilder.Append(string.Join(" AND ", whereQuery));
             }
 
-            if (criteria.Order != null && criteria.Order.OrderType != null)
+            if (criteria.Cursor != null)
+            {
+                queryBuilder.Append(queryBuilder.ToString().Contains("WHERE") ? " AND " : " WHERE ");
+                queryBuilder.Append($"{criteria.Order.OrderBy.Value} < '{criteria.Cursor}'");
+            }
+
+            if (criteria.HasOrder())
             {
                 queryBuilder.Append($" ORDER BY {criteria.Order.OrderBy.Value} {criteria.Order.OrderType.Value}");
             }
-            
-            return criteria;          
 
+            if (criteria.PageSize != 0)
+            {
+
+                queryBuilder.Append($" LIMIT {criteria.PageSize}");
+            }
+
+            return queryBuilder.ToString() + ";";
+        }
+
+        private string GenerateWhereQuery(Filter filter)
+        {
+            if (FilterOperator.IsContains(filter.Operator.Value))
+            {
+                return $"{filter.Field.Value} LIKE '%{filter.Value.Value}%'";
+            }
+
+            if (FilterOperator.IsNoContains(filter.Operator.Value))
+            {
+                return $"{filter.Field.Value} NOT LIKE '%{filter.Value.Value}%'";
+            }
+
+            return $"{filter.Field.Value} {filter.Operator.Value} '{filter.Value.Value}'";
         }
     }
 }
