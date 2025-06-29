@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36202.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeyondNet.Patterns.Criteria", "BeyondNet.Patterns.Criteria\BeyondNet.Patterns.Criteria.csproj", "{9EF49464-F128-4A19-AB13-25C36B576C16}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeyondNet.Patterns.Criteria.Test", "BeyondNet.Patterns.Criteria.Test\BeyondNet.Patterns.Criteria.Test.csproj", "{69BF40F1-B3EB-40BC-838A-C3AB0489876D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9EF49464-F128-4A19-AB13-25C36B576C16}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9EF49464-F128-4A19-AB13-25C36B576C16}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9EF49464-F128-4A19-AB13-25C36B576C16}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9EF49464-F128-4A19-AB13-25C36B576C16}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69BF40F1-B3EB-40BC-838A-C3AB0489876D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69BF40F1-B3EB-40BC-838A-C3AB0489876D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69BF40F1-B3EB-40BC-838A-C3AB0489876D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69BF40F1-B3EB-40BC-838A-C3AB0489876D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AEE7A304-E648-43FD-90E8-7FAE2D406EEB}
+	EndGlobalSection
+EndGlobal
