@@ -43,12 +43,12 @@ namespace BeyondNet.Patterns.Criteria.Test
             Order order = !string.IsNullOrEmpty(orderByParam)
                 ? new Order(    
                     new OrderBy(orderByParam),
-                    new OrderType(orderTypeParam)
+                    new OrderType(orderTypeParam!)
                 )
                 : Order.None();
 
             // Create Criteria object
-            var criteria = new Models.Criteria(new Filters(filterObjects), order);
+            var criteria = new Models.Criteria(new Filters(filterObjects), order, 0, 0);
 
             // Log criteria to console
             Debug.WriteLine(criteria);

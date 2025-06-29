@@ -1,9 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Linq;
-using BeyondNet.Patterns.Criteria.Impl;
-
-namespace BeyondNet.Patterns.Criteria.Test
+﻿namespace BeyondNet.Patterns.Criteria.Test
 {
     [TestClass]
     public class CrtiteriaToSqlTest
@@ -20,10 +15,10 @@ namespace BeyondNet.Patterns.Criteria.Test
         public void ConverTo_ThrowsArgumentException_WhenFieldsToSelectIsNullOrEmpty()
         {
             var converter = new CriteriaToMsSql();
-            var criteria = new Models.Criteria(null, null);
+            var criteria = new Models.Criteria(new Filters([]), new Order(new OrderBy(""), new OrderType("")),0, 0);
 
             Assert.ThrowsException<ArgumentException>(() =>
-                converter.ConverTo(null, "Users", criteria));
+                converter.ConverTo([], "Users", criteria));
 
             Assert.ThrowsException<ArgumentException>(() =>
                 converter.ConverTo(Array.Empty<string>(), "Users", criteria));
@@ -33,7 +28,7 @@ namespace BeyondNet.Patterns.Criteria.Test
         public void ConverTo_ThrowsArgumentException_WhenTableNameIsNullOrEmpty()
         {
             var converter = new CriteriaToMsSql();
-            var criteria = new Models.Criteria(null, null);
+            var criteria = new Models.Criteria(null, null, 0,0);
             Assert.ThrowsException<ArgumentException>(() =>
                 converter.ConverTo(new[] { "Id" }, null, criteria));
             Assert.ThrowsException<ArgumentException>(() =>
@@ -49,7 +44,8 @@ namespace BeyondNet.Patterns.Criteria.Test
                     new Models.Filter(new Models.FilterField("Name"), new Models.FilterOperator("eq"), new Models.FilterValue("John")),
                     new Models.Filter(new Models.FilterField("Age"), new Models.FilterOperator("gt"), new Models.FilterValue("30"))]
                     ),
-                new Models.Order(new Models.OrderBy("Name"), new Models.OrderType("ASC"))
+                new Models.Order(new Models.OrderBy("Name"), new Models.OrderType("ASC")),
+                0, 0
             );
             var sqlQuery = converter.ConverTo(new[] { "Id", "Name", "Age" }, "Users", criteria);
             Assert.IsNotNull(sqlQuery);
