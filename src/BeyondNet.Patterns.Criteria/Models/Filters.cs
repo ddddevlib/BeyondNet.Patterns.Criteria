@@ -2,29 +2,16 @@
 {
     public class Filters
     {
-        public Filter[] Value { get; set; }
+        public string Value { get; set; }
 
-        public Filters(Filter[] value)
+        public Filters(string value)
         {
-            Value = value ?? new Filter[0];
+            Value = value ?? throw new ArgumentNullException(nameof(value), "Filters value cannot be null.");
         }
-
-        public static Filters FromPrimitives(FilterPrimitives[] filterPrimitives)
-        {
-            
-            var filters = filterPrimitives.Select(fp => Filter.FromPrimitives(fp.Field, fp.Operator, fp.Value)).ToArray();
-            return new Filters(filters);
-
-        }
-
-        public FilterPrimitives[] ToPrimitives()
-        {
-            return Value.Select(f => new FilterPrimitives(f.Field.Value, f.Operator.Value, f.Value.Value)).ToArray();
-        }
-
+        
         public bool IsEmpty()
         {
-            return Value == null || Value.Length == 0;
+            return Value.Length == 0;
         }
     }
 }
