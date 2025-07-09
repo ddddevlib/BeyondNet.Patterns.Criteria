@@ -2,11 +2,17 @@
 {
     public class OrderType
     {
-        public string Value { get; set; }
+        public OrderTypes Value { get; }
 
-        public OrderType(string value)
+        public OrderType(OrderTypes value)
         {
             Value = value;
         }
+
+        public bool IsNone()
+        {
+            return Value == OrderTypes.NONE;
+        }
     }
+
 }

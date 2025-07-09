@@ -1,9 +1,9 @@
 ﻿namespace BeyondNet.Patterns.Criteria.Models
 {
-    public  class Order
+    public class Order
     {
-        public OrderBy OrderBy { get; set; }
-        public OrderType OrderType { get; set; }
+        public OrderBy OrderBy { get; }
+        public OrderType OrderType { get; }
 
         public Order(OrderBy orderBy, OrderType orderType)
         {
@@ -11,23 +11,28 @@
             OrderType = orderType;
         }
 
-        public bool IsEmpty()
+        public static Order None()
         {
-            return OrderBy == null || string.IsNullOrEmpty(OrderBy.Value) || OrderType == null || OrderType.Value == OrderTypesEnum.None;
-        }
-
-        public static Order None() 
-        {
-            return new Order(new OrderBy(""), new OrderType(OrderTypesEnum.None));
+            return new Order(new OrderBy(string.Empty), new OrderType(OrderTypes.NONE));
         }
 
         public static Order FromPrimitives(string orderBy, string orderType)
         {
-            if (string.IsNullOrEmpty(orderBy))
+            if (!string.IsNullOrEmpty(orderBy))
             {
-                throw new ArgumentException("OrderBy cannot be null or empty.", nameof(orderBy));
+                return new Order(
+                    new OrderBy(orderBy),
+                    new OrderType(Enum.Parse<OrderTypes>(orderType, ignoreCase: true))
+                );
             }
-            return new Order(new OrderBy(orderBy), new OrderType(orderType));
+
+            return None();
+        }
+
+        public bool IsNone()
+        {
+            return OrderType.IsNone();
         }
     }
+
 }

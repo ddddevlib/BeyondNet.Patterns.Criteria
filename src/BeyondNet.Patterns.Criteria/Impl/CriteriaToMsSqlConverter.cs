@@ -1,77 +1,92 @@
-﻿using BeyondNet.Patterns.Criteria.Interfaces;
-using System.Text.RegularExpressions;
-
-namespace BeyondNet.Patterns.Criteria.Impl
+﻿namespace BeyondNet.Patterns.Criteria.Impl
 {
-    public class CriteriaToMsSqlConverter : ICriteriaConverter
+    using BeyondNet.Patterns.Criteria.Interfaces;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+
+    public class CriteriaToSqlConverter : ICriteriaConverter
     {
-        public string Convert(string[] fieldsToSelect, string tableName, Models.Criteria criteria)
+        public string Convert(
+            IEnumerable<string> fieldsToSelect,
+            string tableName,
+            Models.Criteria criteria,
+            Dictionary<string, string>? mappings = null)
         {
-            var query = $"SELECT {string.Join(", ", fieldsToSelect)} FROM {tableName}";
+            mappings ??= new Dictionary<string, string>();
+            var queryBuilder = new StringBuilder();
 
-            if (criteria.HasFilters())
+            queryBuilder.Append($"SELECT {string.Join(", ", fieldsToSelect)} FROM {tableName}");
+
+            var whereClause = BuildWhereClause(criteria, mappings);
+            if (!string.IsNullOrEmpty(whereClause))
             {
-                var filters = Regex.Split(criteria.Filters.Value, @" AND | OR ");
-                var connectors = Regex.Matches(criteria.Filters.Value, @" AND | OR /g")
-                                      .Cast<Match>()
-                                      .Select(m => m.Value.Trim())
-                                      .ToList();
-
-                var queryFilters = new List<string>();
-
-                for (int i = 0; i < filters.Length; i++)
-                {
-                    var parts = filters[i].Split(' ');
-                    var field = parts[0];
-                    var operatorKey = parts[1];
-                    var value = string.Join(" ", parts.Skip(2));
-
-                    string operatorValue = OperatorEnum.GetValue(operatorKey);
-
-                    if (operatorKey == "CONTAINS" || operatorKey == "NOT_CONTAINS")
-                    {
-                        value = $"%{value}%";
-                    }
-
-                    var finalValue = "";
-
-                    if(int.TryParse(value, out int number))
-                    {
-                        finalValue = number.ToString();  // Output: 30
-                    }
-                    else
-                    {
-                        finalValue = $"'{value}'";  
-                    }
-
-                    queryFilters.Add($"{field} {operatorValue} {finalValue}");
-    
-                    if (i < connectors.Count)
-                    {
-                        queryFilters.Add(connectors[i]);
-                    }
-                }
-
-                query += $" WHERE {string.Join(" ", queryFilters)}";
+                queryBuilder.Append(" WHERE ").Append(whereClause);
             }
 
-            if (criteria.HasOrder())
+            var orderClause = BuildOrderClause(criteria);
+            if (!string.IsNullOrEmpty(orderClause))
             {
-                query += $" ORDER BY {criteria.Order.OrderBy.Value} {criteria.Order.OrderType.Value}";
+                queryBuilder.Append(" ORDER BY ").Append(orderClause);
             }
 
-            if (criteria.PageSize != 0)
-            {
-                query += $" LIMIT {criteria.PageSize}";
-            }
+            AppendLimitOffset(criteria, queryBuilder);
 
-            if (criteria.PageSize != 0 && criteria.PageNumber != 0)
-            {
-                query += $" OFFSET {criteria.PageSize * (criteria.PageNumber - 1)}";
-            }
+            queryBuilder.Append(";");
 
-            return $"{query};";
+            return queryBuilder.ToString();
         }
 
+        private string BuildWhereClause(Models.Criteria criteria, Dictionary<string, string> mappings)
+        {
+            if (!criteria.HasFilters())
+                return string.Empty;
+
+            var conditions = criteria.Filters.Value
+                .Select(filter => GenerateWhereQuery(filter, mappings));
+
+            return string.Join(" AND ", conditions);
+        }
+
+        private string BuildOrderClause(Models.Criteria criteria)
+        {
+            if (!criteria.HasOrder() || criteria.Order.OrderType.IsNone())
+                return string.Empty;
+
+            return $"{criteria.Order.OrderBy.Value} {criteria.Order.OrderType.Value}";
+        }
+
+        private void AppendLimitOffset(Models.Criteria criteria, StringBuilder queryBuilder)
+        {
+            if (criteria.PageSize >= 0)
+            {
+                queryBuilder.Append($" LIMIT {criteria.PageSize}");
+
+                if (criteria.PageNumber >= 0)
+                {
+                    var offset = criteria.PageSize * (criteria.PageNumber - 1);
+                    queryBuilder.Append($" OFFSET {offset}");
+                }
+            }
+        }
+
+        private string GenerateWhereQuery(Filter filter, Dictionary<string, string> mappings)
+        {
+            var field = mappings.TryGetValue(filter.Field.Value, out var mappedField)
+                ? mappedField
+                : filter.Field.Value;
+
+            var value = filter.Value.Value;
+
+            return filter.Operator switch
+            {
+                var op when op.IsContains() => $"{field} LIKE '%{value}%'",
+                var op when op.IsNotContains() => $"{field} NOT LIKE '%{value}%'",
+                var op when op.IsNotEquals() => $"{field} != '{value}'",
+                _ => $"{field} {filter.Operator.Value.ToString()} '{value}'"
+            };
+        }
     }
+
 }
+

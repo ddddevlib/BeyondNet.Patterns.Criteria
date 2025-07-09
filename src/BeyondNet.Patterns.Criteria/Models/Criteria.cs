@@ -1,31 +1,46 @@
 ﻿namespace BeyondNet.Patterns.Criteria.Models
 {
+    using System;
+    using System.Collections.Generic;
+
     public class Criteria
     {
         public Filters Filters { get; }
         public Order Order { get; }
-        public int PageSize { get; }
-        public int PageNumber { get; }
+        public int? PageSize { get; }
+        public int? PageNumber { get; }
 
-        public Criteria(Filters filters, Order order, int pageSize = 0, int pageNumber = 0)
+        public Criteria(Filters filters, Order order, int? pageSize, int? pageNumber)
         {
+            if (pageNumber.HasValue && !pageSize.HasValue)
+            {
+                throw new ArgumentException("Page size is required when page number is defined");
+            }
+
             Filters = filters;
             Order = order;
             PageSize = pageSize;
             PageNumber = pageNumber;
         }
 
-        public static Criteria FromPrimitives(string filters, string order, string orderType, int pageSize = 0, int pageNumber = 0, string cursor = "")
+        public static Criteria FromPrimitives(
+            IEnumerable<FiltersPrimitives> filters,
+            string orderBy,
+            string orderType,
+            int? pageSize,
+            int? pageNumber)
         {
             return new Criteria(
-                new Filters(filters),
-                Order.FromPrimitives(order, orderType),
-                pageSize, pageNumber);
+                Filters.FromPrimitives(filters),
+                Order.FromPrimitives(orderBy, orderType),
+                pageSize,
+                pageNumber
+            );
         }
 
         public bool HasOrder()
         {
-            return !Order.IsEmpty();
+            return !Order.IsNone();
         }
 
         public bool HasFilters()
@@ -33,4 +48,6 @@
             return !Filters.IsEmpty();
         }
     }
+
+
 }

@@ -2,6 +2,6 @@
 {
     public interface ICriteriaConverter
     {
-        string Convert(string[] fieldsToSelect, string tableName, Models.Criteria criteria);
+        string Convert(IEnumerable<string> fieldsToSelect, string tableName, Models.Criteria criteria, Dictionary<string, string> mappings);
     }
 }
